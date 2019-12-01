@@ -1,5 +1,6 @@
 const CANNON = require('cannon')
 const THREE = require('three')
+import './debug.js'
 import Typed from 'typed.js';
 import dat from 'dat.gui'
 import Stats from 'stats.js'
@@ -9,6 +10,7 @@ import { drawKeypoints, drawSkeleton, drawHeatMapValues } from './demo_util'
 const videoWidth = 1250
 const videoHeight = 500
 const stats = new Stats()
+
 
 
 //posenet
@@ -363,6 +365,7 @@ camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShap
 initThree()
 initCannon()
 animate()
+
 function initCannon() {
   world = new CANNON.World()
   world.gravity.set(0,-20,0)
@@ -377,14 +380,20 @@ function initCannon() {
   console.log(physicsContactMaterial)
   world.addContactMaterial(physicsContactMaterial)
   shape = new CANNON.Box(new CANNON.Vec3(1,1,1))
+
+  const gameBox = new CANNON.Box(new CANNON.Vec3(10,20,10))
+  const gameBody = new CANNON.Body({
+    mass: 100, material: physicsMaterial
+  })
   mass = 100
   body = new CANNON.Body({
     mass: 1, material: physicsMaterial
   })
+  gameBody.addShape(gameBox)
   body.addShape(shape)
   body.angularVelocity.set(0,0,0)
   body.angularDamping = 0.2
-  world.addBody(body)
+  world.addBody(body, gameBody)
   body.position.y = 0
 
 
@@ -393,7 +402,7 @@ function initCannon() {
   groundBody.addShape(groundShape)
   groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   groundBody.position.set(0,0,0)
-  groundBody.position.y = -2
+  groundBody.position.y = -5
   world.addBody(groundBody)
   mass = 5, radius = 1
 
@@ -406,14 +415,15 @@ function initCannon() {
   world.addBody(ballBody)
   balls.push(ballBody)
 
-  console.log(groundBody)
+  console.log(world)
   //world.add(groundBody)
 }
 function initThree() {
   scene = new THREE.Scene()
   //camera
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 100 )
-  camera.position.z = 15
+  camera.position.z = 23
+  camera.position.y = -3
   scene.add( camera )
   //lighting
   var Alight = new THREE.AmbientLight( 0x404040 ) // soft white light
@@ -442,8 +452,8 @@ function initThree() {
     transparent: true } )
 
   group = new THREE.Group();
-  group.scale.set(3, 1, 2);
-  scene.add(group)
+  group.scale.set(4, 2, 2);
+
 
   setPlane("y",  Math.PI * 0.5, 0xff0000); //px
   setPlane("y", -Math.PI * 0.5, 0xff0000); //nx
@@ -462,24 +472,41 @@ function initThree() {
         planeGeom.rotateX(angle)
     }
     const plane = new THREE.Mesh(planeGeom, new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide}))
+
     group.add(plane)
   }
+  group.rotation.x+=90
 
-
-  scene.add( mesh, floor )
+  scene.add( mesh, floor, group )
   renderer = new THREE.WebGLRenderer()
   renderer.setSize( window.innerWidth, window.innerHeight )
   document.body.appendChild( renderer.domElement )
 }
+
+
+
+
+
+let cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, world )
+
+
+console.log(cannonDebugRenderer.update)
+
+
 function animate() {
-  group.rotation.y +=0.01
+  //group.rotation.y +=0.01
+  if(cannonDebugRenderer){
+  cannonDebugRenderer.update()
+}
   requestAnimationFrame( animate )
   updatePhysics()
   render()
+
 }
 function updatePhysics() {
   // Step the physics world
   world.step(timeStep)
+
 
   //console.log(mesh.position)
   // Copy coordinates from Cannon.js to Three.js
