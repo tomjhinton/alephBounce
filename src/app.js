@@ -359,7 +359,7 @@ bindPage() /// kick off the demo
 //CANNNON && THREE
 // Create a
 var world, mass, body, shape, timeStep=1/60,
-camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[]
+camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[], group
 initThree()
 initCannon()
 animate()
@@ -411,38 +411,68 @@ function initCannon() {
 }
 function initThree() {
   scene = new THREE.Scene()
+  //camera
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 100 )
-  camera.position.z = 5
+  camera.position.z = 15
   scene.add( camera )
+  //lighting
   var Alight = new THREE.AmbientLight( 0x404040 ) // soft white light
   scene.add( Alight )
   const light = new THREE.DirectionalLight( 0xffffff )
   light.position.set( 40, 25, 10 )
   light.castShadow = true
   scene.add(light)
+
+  //Objects
   geometry = new THREE.BoxGeometry( 2, 2, 2 )
   material =  new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
     transparent: false } )
-  const materialFloor = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
-    transparent: true } )
-  const geometryFloor = new THREE.PlaneGeometry( 50, 50, 2 )
+
+
   var ballGeometry = new THREE.SphereGeometry(1, 32, 32)
   var ballMesh = new THREE.Mesh( ballGeometry, material )
   scene.add(ballMesh)
   ballMeshes.push(ballMesh)
-
   mesh = new THREE.Mesh( geometry, material )
-  floor = new THREE.Mesh( geometryFloor, materialFloor )
-  console.log(floor)
-  floor.material.side = THREE.DoubleSide
-  floor.rotation.x = 90
-  floor.position.y = -10
+
+
+
+  //BOX
+  const materialWall = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
+    transparent: true } )
+
+  group = new THREE.Group();
+  group.scale.set(3, 1, 2);
+  scene.add(group)
+
+  setPlane("y",  Math.PI * 0.5, 0xff0000); //px
+  setPlane("y", -Math.PI * 0.5, 0xff0000); //nx
+  setPlane("x",  Math.PI * 0.5, 0x00ff00); //ny
+  setPlane("y",  0, 0x0000ff); //pz
+  setPlane("y",  Math.PI, 0x0000ff);// nz
+
+  function setPlane(axis, angle, color) {
+    const planeGeom = new THREE.PlaneGeometry(10, 10, 10, 10)
+    planeGeom.translate(0, 0, 5)
+    switch (axis) {
+      case 'y':
+        planeGeom.rotateY(angle)
+        break
+      default:
+        planeGeom.rotateX(angle)
+    }
+    const plane = new THREE.Mesh(planeGeom, new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide}))
+    group.add(plane)
+  }
+
+
   scene.add( mesh, floor )
   renderer = new THREE.WebGLRenderer()
   renderer.setSize( window.innerWidth, window.innerHeight )
   document.body.appendChild( renderer.domElement )
 }
 function animate() {
+  group.rotation.y +=0.01
   requestAnimationFrame( animate )
   updatePhysics()
   render()
@@ -450,12 +480,13 @@ function animate() {
 function updatePhysics() {
   // Step the physics world
   world.step(timeStep)
+
   //console.log(mesh.position)
   // Copy coordinates from Cannon.js to Three.js
   mesh.position.copy(body.position)
   mesh.quaternion.copy(body.quaternion)
-  floor.quaternion.copy(groundBody.quaternion)
-  floor.quaternion.copy(groundBody.quaternion)
+  // floor.quaternion.copy(groundBody.quaternion)
+  // floor.quaternion.copy(groundBody.quaternion)
   for(var i=0; i<balls.length; i++){
     ballMeshes[i].position.copy(balls[i].position)
     ballMeshes[i].quaternion.copy(balls[i].quaternion)
