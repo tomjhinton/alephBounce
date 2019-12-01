@@ -234,17 +234,17 @@ function detectPoseInRealTime(video, net) {
           //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
           // console.log(body.angularVelocity)
-          body.angularVelocity.y+=0.1
-          //console.log('right')
+          body.position.x+=0.4
+          console.log('right')
           // body.position.x+=0.1
         }
 
         if(poses[0][0].keypoints[9].position.x < 600){
           //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          // console.log(body.angularVelocity)
-          body.angularVelocity.y-=0.1
-          //console.log('left')
+          // console.log(body.position)
+          body.position.x-=0.4
+          console.log('left')
 
             // body.position.x-=0.1
         }
@@ -252,13 +252,22 @@ function detectPoseInRealTime(video, net) {
         if(poses[0][0].keypoints[10].position.y < 200){
           //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          // console.log(body.angularVelocity)
-          body.angularVelocity.x-=0.01
+          // console.log(body.velocity)
+          //body.velocity.x-=0.01
           //console.log('left')
 
-            body.position.y-=1
+            body.position.z-=0.4
         }
 
+        if(poses[0][0].keypoints[10].position.y > 200){
+          //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
+
+          // console.log(body.velocity)
+          //body.velocity.x-=0.01
+          //console.log('left')
+
+            body.position.z+=0.4
+        }
 
 
 
@@ -397,7 +406,7 @@ function initCannon() {
   body.position.y = 0
 
 
-  groundShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  groundShape = new CANNON.Box(new CANNON.Vec3(30,30,10))
   groundBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   groundBody.addShape(groundShape)
   groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
@@ -405,7 +414,7 @@ function initCannon() {
   groundBody.position.y = -20
   world.addBody(groundBody)
 
-  ceilingShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  ceilingShape = new CANNON.Box(new CANNON.Vec3(30,30,10))
   ceilingBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   ceilingBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   ceilingBody.addShape(ceilingShape)
@@ -413,7 +422,7 @@ function initCannon() {
   ceilingBody.position.y = 20
   world.addBody(ceilingBody)
 
-  leftWallShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  leftWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
   leftWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   leftWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   leftWallBody.addShape(leftWallShape)
@@ -421,7 +430,7 @@ function initCannon() {
   leftWallBody.position.z = -20
   world.addBody(leftWallBody)
 
-  rightWallShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  rightWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
   rightWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   rightWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   rightWallBody.addShape(rightWallShape)
@@ -429,23 +438,23 @@ function initCannon() {
   rightWallBody.position.z = 20
   world.addBody(rightWallBody)
 
-  frontWallShape = new CANNON.Box(new CANNON.Vec3(10,10,10))
+  frontWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
   frontWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   frontWallBody.addShape(frontWallShape)
   frontWallBody.position.set(0,0,0)
-  frontWallBody.position.x = -30
+  frontWallBody.position.x = -40
   world.addBody(frontWallBody)
 
-  backWallShape = new CANNON.Box(new CANNON.Vec3(10,10,10))
+  backWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
   backWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   backWallBody.addShape(backWallShape)
   backWallBody.position.set(0,0,0)
-  backWallBody.position.x = 30
+  backWallBody.position.x = 40
   world.addBody(backWallBody)
 
 
 
-  console.log(ceilingBody)
+  console.log(ballBody)
 
 
 
@@ -460,7 +469,7 @@ function initCannon() {
   ballBody.linearDamping = 0.9
   world.addBody(ballBody)
   balls.push(ballBody)
-
+  console.log(ballBody)
   console.log(world)
   //world.add(groundBody)
 }
