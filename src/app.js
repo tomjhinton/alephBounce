@@ -10,7 +10,7 @@ import { drawKeypoints, drawSkeleton, drawHeatMapValues } from './demo_util'
 const videoWidth = 1250
 const videoHeight = 500
 const stats = new Stats()
-
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 
 //posenet
@@ -361,7 +361,7 @@ bindPage() /// kick off the demo
 //CANNNON && THREE
 // Create a
 var world, mass, body, shape, timeStep=1/60,
-camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[], group
+camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[], group, controls, ceilingBody, ceilingShape , leftWallShape, leftWallBody, rightWallShape, rightWallBody, frontWallShape, frontWallBody, backWallShape, backWallBody
 initThree()
 initCannon()
 animate()
@@ -393,17 +393,63 @@ function initCannon() {
   body.addShape(shape)
   body.angularVelocity.set(0,0,0)
   body.angularDamping = 0.2
-  world.addBody(body, gameBody)
+  world.addBody(body)
   body.position.y = 0
 
 
-  groundShape = new CANNON.Plane()
+  groundShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
   groundBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
   groundBody.addShape(groundShape)
   groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   groundBody.position.set(0,0,0)
-  groundBody.position.y = -5
+  groundBody.position.y = -20
   world.addBody(groundBody)
+
+  ceilingShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  ceilingBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  ceilingBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
+  ceilingBody.addShape(ceilingShape)
+  ceilingBody.position.set(0,0,0)
+  ceilingBody.position.y = 20
+  world.addBody(ceilingBody)
+
+  leftWallShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  leftWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  leftWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
+  leftWallBody.addShape(leftWallShape)
+  leftWallBody.position.set(0,0,0)
+  leftWallBody.position.z = -20
+  world.addBody(leftWallBody)
+
+  rightWallShape = new CANNON.Box(new CANNON.Vec3(20,10,10))
+  rightWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  rightWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
+  rightWallBody.addShape(rightWallShape)
+  rightWallBody.position.set(0,0,0)
+  rightWallBody.position.z = 20
+  world.addBody(rightWallBody)
+
+  frontWallShape = new CANNON.Box(new CANNON.Vec3(10,10,10))
+  frontWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  frontWallBody.addShape(frontWallShape)
+  frontWallBody.position.set(0,0,0)
+  frontWallBody.position.x = -30
+  world.addBody(frontWallBody)
+
+  backWallShape = new CANNON.Box(new CANNON.Vec3(10,10,10))
+  backWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  backWallBody.addShape(backWallShape)
+  backWallBody.position.set(0,0,0)
+  backWallBody.position.x = 30
+  world.addBody(backWallBody)
+
+
+
+  console.log(ceilingBody)
+
+
+
+
   mass = 5, radius = 1
 
 
@@ -433,6 +479,7 @@ function initThree() {
   light.castShadow = true
   scene.add(light)
 
+
   //Objects
   geometry = new THREE.BoxGeometry( 2, 2, 2 )
   material =  new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
@@ -457,7 +504,7 @@ function initThree() {
 
   setPlane("y",  Math.PI * 0.5, 0xff0000); //px
   setPlane("y", -Math.PI * 0.5, 0xff0000); //nx
-  setPlane("x",  Math.PI * 0.5, 0x00ff00); //ny
+  setPlane("x",  -Math.PI * 0.5, 0x00ff00); //ny
   setPlane("y",  0, 0x0000ff); //pz
   setPlane("y",  Math.PI, 0x0000ff);// nz
 
@@ -475,29 +522,29 @@ function initThree() {
 
     group.add(plane)
   }
-  group.rotation.x+=90
-
+  group.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   scene.add( mesh, floor, group )
   renderer = new THREE.WebGLRenderer()
   renderer.setSize( window.innerWidth, window.innerHeight )
   document.body.appendChild( renderer.domElement )
+  controls = new OrbitControls( camera, renderer.domElement )
 }
 
 
 
 
 
-let cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, world )
+const cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, world )
 
 
-console.log(cannonDebugRenderer.update)
 
 
 function animate() {
   //group.rotation.y +=0.01
   if(cannonDebugRenderer){
-  cannonDebugRenderer.update()
-}
+    cannonDebugRenderer.update()
+  }
+  controls.update()
   requestAnimationFrame( animate )
   updatePhysics()
   render()
