@@ -359,7 +359,7 @@ bindPage() /// kick off the demo
 //CANNNON && THREE
 // Create a
 var world, mass, body, shape, timeStep=1/60,
-camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial
+camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[]
 initThree()
 initCannon()
 animate()
@@ -388,14 +388,23 @@ function initCannon() {
   body.position.y = 0
 
 
-  groundShape = new CANNON.Plane();
+  groundShape = new CANNON.Plane()
   groundBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
-  groundBody.addShape(groundShape);
+  groundBody.addShape(groundShape)
   groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   groundBody.position.set(0,0,0)
   groundBody.position.y = -2
   world.addBody(groundBody)
+  mass = 5, radius = 1
 
+
+  ballShape = new CANNON.Sphere(radius)
+  ballBody = new CANNON.Body({ mass: mass })
+  ballBody.addShape(ballShape)
+  ballBody.position.set(0,5,0)
+  ballBody.linearDamping = 0.9
+  world.addBody(ballBody)
+  balls.push(ballBody)
 
   console.log(groundBody)
   //world.add(groundBody)
@@ -408,15 +417,20 @@ function initThree() {
   var Alight = new THREE.AmbientLight( 0x404040 ) // soft white light
   scene.add( Alight )
   const light = new THREE.DirectionalLight( 0xffffff )
-    light.position.set( 40, 25, 10 )
-    light.castShadow = true
-    scene.add(light)
+  light.position.set( 40, 25, 10 )
+  light.castShadow = true
+  scene.add(light)
   geometry = new THREE.BoxGeometry( 2, 2, 2 )
   material =  new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
     transparent: false } )
   const materialFloor = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
     transparent: true } )
   const geometryFloor = new THREE.PlaneGeometry( 50, 50, 2 )
+  var ballGeometry = new THREE.SphereGeometry(1, 32, 32)
+  var ballMesh = new THREE.Mesh( ballGeometry, material )
+  scene.add(ballMesh)
+  ballMeshes.push(ballMesh)
+
   mesh = new THREE.Mesh( geometry, material )
   floor = new THREE.Mesh( geometryFloor, materialFloor )
   console.log(floor)
@@ -442,6 +456,10 @@ function updatePhysics() {
   mesh.quaternion.copy(body.quaternion)
   floor.quaternion.copy(groundBody.quaternion)
   floor.quaternion.copy(groundBody.quaternion)
+  for(var i=0; i<balls.length; i++){
+    ballMeshes[i].position.copy(balls[i].position)
+    ballMeshes[i].quaternion.copy(balls[i].quaternion)
+  }
 }
 function render() {
   renderer.render( scene, camera )
