@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs'
 import * as posenet from '@tensorflow-models/posenet'
 import '@babel/polyfill'
-const color = 'white'
+const color = 'black'
 const lineWidth = 20
 const colorLeft = 'blue'
 const colorRight = 'red'

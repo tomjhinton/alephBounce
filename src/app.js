@@ -225,23 +225,36 @@ function detectPoseInRealTime(video, net) {
         //color = `rgba(${pose.keypoints[9].position.x/100},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`
 
         //left square
-        console.log(poses.length)
-        console.log(poses)
+        // console.log(poses.length)
+        // console.log(poses)
         if(poses.length>= 1){
         if(poses[0][0].keypoints[9].position.x > 600){
           //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          console.log(body.angularVelocity)
+          // console.log(body.angularVelocity)
           body.angularVelocity.y+=0.1
-          body.position.x+=0.1
+          //console.log('right')
+          // body.position.x+=0.1
         }
 
         if(poses[0][0].keypoints[9].position.x < 600){
           //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          console.log(body.angularVelocity)
+          // console.log(body.angularVelocity)
           body.angularVelocity.y-=0.1
-            body.position.x-=0.1
+          //console.log('left')
+
+            // body.position.x-=0.1
+        }
+
+        if(poses[0][0].keypoints[10].position.y < 200){
+          //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
+
+          // console.log(body.angularVelocity)
+          body.angularVelocity.x-=0.01
+          //console.log('left')
+
+            body.position.y-=1
         }
 
 
@@ -346,34 +359,71 @@ bindPage() /// kick off the demo
 //CANNNON && THREE
 // Create a
 var world, mass, body, shape, timeStep=1/60,
-camera, scene, renderer, geometry, material, mesh
+camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial
 initThree()
 initCannon()
 animate()
 function initCannon() {
   world = new CANNON.World()
-  world.gravity.set(0,0,0)
+  world.gravity.set(0,-20,0)
   world.broadphase = new CANNON.NaiveBroadphase()
   world.solver.iterations = 10
+
+  physicsMaterial = new CANNON.Material('slipperyMaterial')
+  var physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,physicsMaterial)
+  physicsContactMaterial.friction = 0
+  physicsContactMaterial.restitution = 0.9
+
+  console.log(physicsContactMaterial)
+  world.addContactMaterial(physicsContactMaterial)
   shape = new CANNON.Box(new CANNON.Vec3(1,1,1))
   mass = 100
   body = new CANNON.Body({
-    mass: 1
+    mass: 1, material: physicsMaterial
   })
   body.addShape(shape)
   body.angularVelocity.set(0,0,0)
   body.angularDamping = 0.2
   world.addBody(body)
+  body.position.y = 0
+
+
+  groundShape = new CANNON.Plane();
+  groundBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  groundBody.addShape(groundShape);
+  groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
+  groundBody.position.set(0,0,0)
+  groundBody.position.y = -2
+  world.addBody(groundBody)
+
+
+  console.log(groundBody)
+  //world.add(groundBody)
 }
 function initThree() {
   scene = new THREE.Scene()
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 100 )
   camera.position.z = 5
   scene.add( camera )
+  var Alight = new THREE.AmbientLight( 0x404040 ) // soft white light
+  scene.add( Alight )
+  const light = new THREE.DirectionalLight( 0xffffff )
+    light.position.set( 40, 25, 10 )
+    light.castShadow = true
+    scene.add(light)
   geometry = new THREE.BoxGeometry( 2, 2, 2 )
-  material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } )
+  material =  new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
+    transparent: false } )
+  const materialFloor = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
+    transparent: true } )
+  const geometryFloor = new THREE.PlaneGeometry( 50, 50, 2 )
   mesh = new THREE.Mesh( geometry, material )
-  scene.add( mesh )
+  floor = new THREE.Mesh( geometryFloor, materialFloor )
+  console.log(floor)
+  floor.material.side = THREE.DoubleSide
+  floor.rotation.x = 90
+  floor.position.y = -10
+  scene.add( mesh, floor )
   renderer = new THREE.WebGLRenderer()
   renderer.setSize( window.innerWidth, window.innerHeight )
   document.body.appendChild( renderer.domElement )
@@ -386,9 +436,12 @@ function animate() {
 function updatePhysics() {
   // Step the physics world
   world.step(timeStep)
+  //console.log(mesh.position)
   // Copy coordinates from Cannon.js to Three.js
   mesh.position.copy(body.position)
   mesh.quaternion.copy(body.quaternion)
+  floor.quaternion.copy(groundBody.quaternion)
+  floor.quaternion.copy(groundBody.quaternion)
 }
 function render() {
   renderer.render( scene, camera )
