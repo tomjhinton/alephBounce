@@ -373,22 +373,22 @@ function checkKey(e) {
   e.preventDefault()
 
 
-if (e.keyCode === 82) {
+  if (e.keyCode === 82) {
 
     ballMeshes.map(x=>{
       x.geometry.dispose()
       x.material.dispose()
       scene.remove( x )
-} )
+    } )
 
-  balls.map(x=>{
+    balls.map(x=>{
 
-    world.remove(x)
-    // balls.delete(x)
-  } )
-  balls = []
-  ballMeshes = []
-  console.log(balls)
+      world.remove(x)
+
+    } )
+    balls = []
+    ballMeshes = []
+
     score = 0
     playing = true
     ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
@@ -405,7 +405,7 @@ camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShap
 initGame()
 animate()
 const scoreboard = document.getElementById('score')
-scoreboard.innerHTML = score
+scoreboard.innerHTML = 'SCORE: '+ score
 
 
 //var loader = new THREE.FontLoader();
@@ -650,7 +650,7 @@ function animate() {
     //cannonDebugRenderer.update()
   }
   if(scoreboard && playing){
-    scoreboard.innerHTML = score
+    scoreboard.innerHTML ='SCORE: '+ score
   }
 
   controls.update()
