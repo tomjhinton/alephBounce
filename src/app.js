@@ -531,7 +531,7 @@ function initGame() {
 
 
 
-  console.log(world)
+  //console.log(world)
   //world.add(groundBody)
 
 
@@ -620,7 +620,7 @@ function ballCreate(x,y){
   ballBody.angularVelocity.y = 3
   ballBody.velocity.x = 10
   ballBody.velocity.z = -10
-  console.log(ballBody)
+  //console.log(ballBody)
   ballBody.addEventListener('collide',function(e){
     // console.log(e)
     // console.log(e.body.position.y)
