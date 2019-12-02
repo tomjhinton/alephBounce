@@ -10,7 +10,7 @@
   width: 625px;
   height: 250px;
   margin-top:  2em;
-  opacity: 0.9
+  opacity: 0.9;
 }
 
 video{margin-top: 20em;
@@ -36,4 +36,13 @@ video{margin-top: 20em;
 }
 #game{
   margin-top: 3em;
+}
+
+#instructions{
+  position: absolute;
+  font-family: Helvetica;
+  color: #4AF626;
+  font-size: 3em;
+  margin-top: 85vh;
+  background-color: rgba(0,0,0,0);
 }
