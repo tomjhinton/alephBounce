@@ -386,10 +386,12 @@ if (e.keyCode === 82) {
     world.remove(x)
     // balls.delete(x)
   } )
+  balls = []
+  ballMeshes = []
   console.log(balls)
     score = 0
     playing = true
-
+    ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
 
   }
 }
@@ -554,44 +556,7 @@ function initGame() {
   material =  new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
     transparent: false } )
 
-  function ballCreate(x,y){
-    const materialBall = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
-      transparent: true } )
 
-    const ballGeometry = new THREE.SphereGeometry(1, 32, 32)
-    const ballMesh = new THREE.Mesh( ballGeometry, materialBall )
-    ballMesh.name = 'ball'
-    scene.add(ballMesh)
-    ballMeshes.push(ballMesh)
-
-    mass = 2, radius = 1
-
-
-    ballShape = new CANNON.Sphere(radius)
-    ballBody = new CANNON.Body({ mass: 1, material: ballMaterial })
-    ballBody.addShape(ballShape)
-    ballBody.linearDamping = 0
-    world.addBody(ballBody)
-    balls.push(ballBody)
-    ballBody.position.set(x,y,0)
-    ballBody.angularVelocity.y = 3
-    ballBody.velocity.x = 10
-    ballBody.velocity.z = -10
-    console.log(ballBody)
-    ballBody.addEventListener('collide',function(e){
-
-      if(e.contact.bi.material.name ==='playerMaterial' || e.contact.bj.material.name ==='playerMaterial')
-        playing = false
-
-    })
-
-  }
-  ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
-
-  setInterval(function () {
-    ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
-    score++
-  }, 10000)
   //BOX
 
   mesh = new THREE.Mesh( geometry, material )
@@ -630,7 +595,44 @@ function initGame() {
 
 
 
+function ballCreate(x,y){
+  const materialBall = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
+    transparent: true } )
 
+  const ballGeometry = new THREE.SphereGeometry(1, 32, 32)
+  const ballMesh = new THREE.Mesh( ballGeometry, materialBall )
+  ballMesh.name = 'ball'
+  scene.add(ballMesh)
+  ballMeshes.push(ballMesh)
+
+  mass = 2, radius = 1
+
+
+  ballShape = new CANNON.Sphere(radius)
+  ballBody = new CANNON.Body({ mass: 1, material: ballMaterial })
+  ballBody.addShape(ballShape)
+  ballBody.linearDamping = 0
+  world.addBody(ballBody)
+  balls.push(ballBody)
+  ballBody.position.set(x,y,0)
+  ballBody.angularVelocity.y = 3
+  ballBody.velocity.x = 10
+  ballBody.velocity.z = -10
+  console.log(ballBody)
+  ballBody.addEventListener('collide',function(e){
+
+    if(e.contact.bi.material.name ==='playerMaterial' || e.contact.bj.material.name ==='playerMaterial')
+      playing = false
+
+  })
+
+}
+ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
+
+setInterval(function () {
+  ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
+  score++
+}, 10000)
 
 const cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, world )
 
