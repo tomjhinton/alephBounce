@@ -1,8 +1,9 @@
-canvas{margin-left: 5em;
+#output{margin-left: 35%;
   z-index: 1;
   border:3px solid black;
   width: 1250px;
   height: 500px;
+  margin-top:  2em;
 }
 
 video{margin-top: 20em;
@@ -11,4 +12,14 @@ video{margin-top: 20em;
   -webkit-transform: scaleX(-1);
   transform: scaleX(-1);
   display: none;
+}
+
+#scoreboard{
+  position: absolute;
+  z-index: 1;
+  font-family: Helvetica;
+  color: #4AF626;
+  font-size: 5em;
+  margin-left: 3em;
+  margin-top: 3em;
 }

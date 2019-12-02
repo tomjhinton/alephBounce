@@ -235,7 +235,7 @@ function detectPoseInRealTime(video, net) {
 
           // console.log(body.angularVelocity)
           body.position.x+=0.4
-          console.log('right')
+          //console.log('right')
           // body.position.x+=0.1
         }
 
@@ -244,7 +244,7 @@ function detectPoseInRealTime(video, net) {
 
           // console.log(body.position)
           body.position.x-=0.4
-          console.log('left')
+        //  console.log('left')
 
             // body.position.x-=0.1
         }
@@ -363,46 +363,103 @@ navigator.getUserMedia = navigator.getUserMedia ||
   navigator.mozGetUserMedia
 bindPage() /// kick off the demo
 
+document.onkeydown = checkKey
 
+
+
+function checkKey(e) {
+
+  e = e || window.event
+  e.preventDefault()
+
+
+if (e.keyCode === 82) {
+
+  balls.length = 0
+  ballMeshes.length = 0
+  ballCreate()
+
+
+    score = 0
+    playing = true
+
+
+  }
+}
 
 //TONE
 
 //CANNNON && THREE
 // Create a
 var world, mass, body, shape, timeStep=1/60,
-camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[], group, controls, ceilingBody, ceilingShape , leftWallShape, leftWallBody, rightWallShape, rightWallBody, frontWallShape, frontWallBody, backWallShape, backWallBody, ballMaterial, ballContactMaterial, physicsContactMaterial, score
+camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShape, physicsMaterial, ballShape, ballBody, radius, balls=[], ballMeshes=[], group, controls, ceilingBody, ceilingShape , leftWallShape, leftWallBody, rightWallShape, rightWallBody, frontWallShape, frontWallBody, backWallShape, backWallBody, ballMaterial, ballContactMaterial, physicsContactMaterial, score = 0, playerMaterial, playerContactMaterial, wallMaterial, wallContactMaterial, textGeo, playing = true
 initGame()
 animate()
+const scoreboard = document.getElementById('score')
+var loader = new THREE.FontLoader();
+scoreboard.innerHTML = score
+loader.load( '/samples/helvetiker_regular.typeface.json', function ( font ) {
 
+     textGeo = new THREE.TextGeometry( 'Left arm = Forwards & Backwards, Right arm = Left & Right ',  {
+
+        font: font,
+
+        size: 2,
+        height: 2,
+        // curveSegments: 1,
+        // bevelThickness: 0.2,
+				// bevelSize: 0.5,
+				// bevelEnabled: true,
+				// bevelSegments: 2,
+				// steps: 4
+
+
+
+    } );
+
+    var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+
+    var mesh = new THREE.Mesh( textGeo, textMaterial )
+    mesh.position.set( -30, 15, -5 );
+
+    scene.add( mesh );
+    console.log(textGeo.parameters.text)
+
+} );
+console.log(textGeo)
 function initGame() {
   world = new CANNON.World()
   world.gravity.set(0,-10,0)
   world.broadphase = new CANNON.NaiveBroadphase()
   world.solver.iterations = 10
 
-  physicsMaterial = new CANNON.Material('slipperyMaterial')
-  ballMaterial = new CANNON.Material('slipperyMaterial')
-  physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,physicsMaterial)
-  physicsContactMaterial.friction = 0
-  physicsContactMaterial.restitution = 0.2
-  ballContactMaterial = new CANNON.ContactMaterial(ballMaterial, physicsMaterial)
+  wallMaterial = new CANNON.Material('wallMaterial')
+  ballMaterial = new CANNON.Material('ballMaterial')
+  playerMaterial = new CANNON.Material('playerMaterial')
+
+  wallContactMaterial = new CANNON.ContactMaterial(ballMaterial, wallMaterial)
+  wallContactMaterial.friction = 0
+  wallContactMaterial.restitution = 1
+
+  playerContactMaterial = new CANNON.ContactMaterial(playerMaterial,wallMaterial)
+  playerContactMaterial.friction = 0
+  playerContactMaterial.restitution = 0.2
+
+  ballContactMaterial = new CANNON.ContactMaterial(ballMaterial, ballMaterial)
   ballContactMaterial.friction = 0
   ballContactMaterial.restitution = 1
 
   world.addContactMaterial(ballContactMaterial)
-  console.log(physicsContactMaterial)
-  world.addContactMaterial(physicsContactMaterial)
+  world.addContactMaterial(playerContactMaterial)
+  world.addContactMaterial(wallContactMaterial)
   shape = new CANNON.Box(new CANNON.Vec3(1,1,1))
 
-  const gameBox = new CANNON.Box(new CANNON.Vec3(10,20,10))
-  const gameBody = new CANNON.Body({
-    mass: 100, material: physicsMaterial
-  })
+
   mass = 100
   body = new CANNON.Body({
-    mass: 1, material: physicsMaterial
+    mass: 1, material: playerMaterial
   })
-  gameBody.addShape(gameBox)
+
   body.addShape(shape)
   body.angularVelocity.set(0,0,0)
   body.angularDamping = 0.2
@@ -410,8 +467,10 @@ function initGame() {
   body.position.y = 0
 
 
+
+
   groundShape = new CANNON.Box(new CANNON.Vec3(30,30,10))
-  groundBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  groundBody = new CANNON.Body({ mass: 0, material: wallMaterial })
   groundBody.addShape(groundShape)
   groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   groundBody.position.set(0,0,0)
@@ -419,7 +478,7 @@ function initGame() {
   world.addBody(groundBody)
 
   ceilingShape = new CANNON.Box(new CANNON.Vec3(30,30,10))
-  ceilingBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  ceilingBody = new CANNON.Body({ mass: 0, material: wallMaterial })
   ceilingBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   ceilingBody.addShape(ceilingShape)
   ceilingBody.position.set(0,0,0)
@@ -427,7 +486,7 @@ function initGame() {
   world.addBody(ceilingBody)
 
   leftWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
-  leftWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  leftWallBody = new CANNON.Body({ mass: 0, material: wallMaterial })
   leftWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   leftWallBody.addShape(leftWallShape)
   leftWallBody.position.set(0,0,0)
@@ -435,7 +494,7 @@ function initGame() {
   world.addBody(leftWallBody)
 
   rightWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
-  rightWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  rightWallBody = new CANNON.Body({ mass: 0, material: wallMaterial })
   rightWallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
   rightWallBody.addShape(rightWallShape)
   rightWallBody.position.set(0,0,0)
@@ -443,14 +502,14 @@ function initGame() {
   world.addBody(rightWallBody)
 
   frontWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
-  frontWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  frontWallBody = new CANNON.Body({ mass: 0, material: wallMaterial })
   frontWallBody.addShape(frontWallShape)
   frontWallBody.position.set(0,0,0)
   frontWallBody.position.x = -40
   world.addBody(frontWallBody)
 
   backWallShape = new CANNON.Box(new CANNON.Vec3(20,10,20))
-  backWallBody = new CANNON.Body({ mass: 0, material: physicsMaterial })
+  backWallBody = new CANNON.Body({ mass: 0, material: wallMaterial })
   backWallBody.addShape(backWallShape)
   backWallBody.position.set(0,0,0)
   backWallBody.position.x = 40
@@ -486,29 +545,35 @@ function initGame() {
   material =  new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
     transparent: false } )
 
-    function ballCreate(x,y){
-  const materialBall = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
-    transparent: true } )
+  function ballCreate(x,y){
+    const materialBall = new THREE.MeshPhongMaterial( { color: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`, specular: `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)` , shininess: 100, side: THREE.DoubleSide, opacity: 0.8,
+      transparent: true } )
 
-  var ballGeometry = new THREE.SphereGeometry(1, 32, 32)
-  var ballMesh = new THREE.Mesh( ballGeometry, materialBall )
-  scene.add(ballMesh)
-  ballMeshes.push(ballMesh)
+    const ballGeometry = new THREE.SphereGeometry(1, 32, 32)
+    const ballMesh = new THREE.Mesh( ballGeometry, materialBall )
+    scene.add(ballMesh)
+    ballMeshes.push(ballMesh)
 
-    mass = 5, radius = 1
+    mass = 2, radius = 1
 
 
     ballShape = new CANNON.Sphere(radius)
-    ballBody = new CANNON.Body({ mass: 2, material: ballContactMaterial })
+    ballBody = new CANNON.Body({ mass: 1, material: ballMaterial })
     ballBody.addShape(ballShape)
-    //ballBody.linearDamping = 0.1
+    ballBody.linearDamping = 0
     world.addBody(ballBody)
     balls.push(ballBody)
     ballBody.position.set(x,y,0)
     ballBody.angularVelocity.y = 3
     ballBody.velocity.x = 10
     ballBody.velocity.z = -10
+    console.log(ballBody)
+    ballBody.addEventListener('collide',function(e){
 
+      if(e.contact.bi.material.name ==='playerMaterial' || e.contact.bj.material.name ==='playerMaterial')
+        playing = false
+
+    })
 
   }
   ballCreate(Math.floor(Math.random()*5), Math.floor(Math.random()*5))
@@ -545,10 +610,11 @@ mesh = new THREE.Mesh( geometry, material )
     group.add(plane)
   }
   group.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0),-Math.PI/2)
+  const game = document.getElementById('game')
   scene.add( mesh, floor, group )
   renderer = new THREE.WebGLRenderer()
   renderer.setSize( window.innerWidth, window.innerHeight )
-  document.body.appendChild( renderer.domElement )
+  game.appendChild( renderer.domElement )
   controls = new OrbitControls( camera, renderer.domElement )
 }
 
@@ -562,10 +628,19 @@ const cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, world )
 
 
 function animate() {
+
+
+  if(scoreboard && !playing){
+    scoreboard.innerHTML = ' GAME OVER: R TO RESET'
+  }
   //group.rotation.y +=0.01
   if(cannonDebugRenderer){
     //cannonDebugRenderer.update()
   }
+  if(scoreboard && playing){
+    scoreboard.innerHTML = score
+  }
+  score = balls.length
   controls.update()
   requestAnimationFrame( animate )
   updatePhysics()
