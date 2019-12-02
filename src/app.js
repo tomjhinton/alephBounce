@@ -7,11 +7,11 @@ import Stats from 'stats.js'
 import * as posenet from '@tensorflow-models/posenet'
 import './style.scss'
 import { drawKeypoints, drawSkeleton, drawHeatMapValues } from './demo_util'
-const videoWidth = 1250
-const videoHeight = 500
+const videoWidth = 625
+const videoHeight = 250
 const stats = new Stats()
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-
+import 'bulma'
 
 //posenet
 function isAndroid() {
@@ -377,7 +377,8 @@ if (e.keyCode === 82) {
 
   balls.length = 0
   ballMeshes.length = 0
-  ballCreate()
+
+
 
 
     score = 0
@@ -396,36 +397,38 @@ camera, scene, renderer, geometry, material, mesh, groundBody, floor, groundShap
 initGame()
 animate()
 const scoreboard = document.getElementById('score')
-var loader = new THREE.FontLoader();
 scoreboard.innerHTML = score
-loader.load( '/samples/helvetiker_regular.typeface.json', function ( font ) {
-
-     textGeo = new THREE.TextGeometry( 'Left arm = Forwards & Backwards, Right arm = Left & Right ',  {
-
-        font: font,
-
-        size: 2,
-        height: 2,
-        // curveSegments: 1,
-        // bevelThickness: 0.2,
-				// bevelSize: 0.5,
-				// bevelEnabled: true,
-				// bevelSegments: 2,
-				// steps: 4
 
 
-
-    } );
-
-    var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
-
-    var mesh = new THREE.Mesh( textGeo, textMaterial )
-    mesh.position.set( -30, 15, -5 );
-
-    scene.add( mesh );
-    console.log(textGeo.parameters.text)
-
-} );
+//var loader = new THREE.FontLoader();
+// loader.load( '/samples/helvetiker_regular.typeface.json', function ( font ) {
+//
+//      textGeo = new THREE.TextGeometry( 'Left arm = Forwards & Backwards, Right arm = Left & Right ',  {
+//
+//         font: font,
+//
+//         size: 2,
+//         height: 2,
+//         // curveSegments: 1,
+//         // bevelThickness: 0.2,
+// 				// bevelSize: 0.5,
+// 				// bevelEnabled: true,
+// 				// bevelSegments: 2,
+// 				// steps: 4
+//
+//
+//
+//     } );
+//
+//     var textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+//
+//     var mesh = new THREE.Mesh( textGeo, textMaterial )
+//     mesh.position.set( -30, 15, -5 );
+//
+//     scene.add( mesh );
+//     console.log(textGeo.parameters.text)
+//
+// } )
 console.log(textGeo)
 function initGame() {
   world = new CANNON.World()
@@ -584,16 +587,16 @@ function initGame() {
   }, 10000)
   //BOX
 
-mesh = new THREE.Mesh( geometry, material )
-  group = new THREE.Group();
-  group.scale.set(4, 2, 2);
+  mesh = new THREE.Mesh( geometry, material )
+  group = new THREE.Group()
+  group.scale.set(4, 2, 2)
 
 
-  setPlane("y",  Math.PI * 0.5, 0xff0000); //px
-  setPlane("y", -Math.PI * 0.5, 0xff0000); //nx
-  setPlane("x",  -Math.PI * 0.5, 0x00ff00); //ny
-  setPlane("y",  0, 0x0000ff); //pz
-  setPlane("y",  Math.PI, 0x0000ff);// nz
+  setPlane('y',  Math.PI * 0.5, 0xff0000) //px
+  setPlane('y', -Math.PI * 0.5, 0xff0000) //nx
+  setPlane('x',  -Math.PI * 0.5, 0x00ff00) //ny
+  setPlane('y',  0, 0x0000ff) //pz
+  setPlane('y',  Math.PI, 0x0000ff)// nz
 
   function setPlane(axis, angle, color) {
     const planeGeom = new THREE.PlaneGeometry(10, 10, 10, 10)

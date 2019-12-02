@@ -1,9 +1,16 @@
-#output{margin-left: 35%;
+*{
+  background-color: black
+}
+
+#output{
+  position: absolute;
+  margin-left: 3%;
   z-index: 1;
-  border:3px solid black;
-  width: 1250px;
-  height: 500px;
+  //border:3px solid black;
+  width: 625px;
+  height: 250px;
   margin-top:  2em;
+  opacity: 0.9
 }
 
 video{margin-top: 20em;
@@ -15,11 +22,18 @@ video{margin-top: 20em;
 }
 
 #scoreboard{
+  background-color: rgba(0,0,0,0);
   position: absolute;
   z-index: 1;
   font-family: Helvetica;
   color: #4AF626;
-  font-size: 5em;
-  margin-left: 3em;
+  font-size: 3em;
+  margin-left: 1em;
+  margin-top: 3em;
+  span{
+    background-color: rgba(0,0,0,0);
+  }
+}
+#game{
   margin-top: 3em;
 }
