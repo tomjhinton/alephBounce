@@ -375,12 +375,18 @@ function checkKey(e) {
 
 if (e.keyCode === 82) {
 
-  balls.length = 0
-  ballMeshes.length = 0
+    ballMeshes.map(x=>{
+      x.geometry.dispose()
+      x.material.dispose()
+      scene.remove( x )
+} )
 
+  balls.map(x=>{
 
-
-
+    world.remove(x)
+    // balls.delete(x)
+  } )
+  console.log(balls)
     score = 0
     playing = true
 
@@ -429,7 +435,7 @@ scoreboard.innerHTML = score
 //     console.log(textGeo.parameters.text)
 //
 // } )
-console.log(textGeo)
+//console.log(textGeo)
 function initGame() {
   world = new CANNON.World()
   world.gravity.set(0,-10,0)
@@ -554,6 +560,7 @@ function initGame() {
 
     const ballGeometry = new THREE.SphereGeometry(1, 32, 32)
     const ballMesh = new THREE.Mesh( ballGeometry, materialBall )
+    ballMesh.name = 'ball'
     scene.add(ballMesh)
     ballMeshes.push(ballMesh)
 
@@ -643,7 +650,7 @@ function animate() {
   if(scoreboard && playing){
     scoreboard.innerHTML = score
   }
-  score = balls.length
+
   controls.update()
   requestAnimationFrame( animate )
   updatePhysics()
