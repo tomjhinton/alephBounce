@@ -1,10 +1,11 @@
 const CANNON = require('cannon')
 const THREE = require('three')
+import Tone from 'tone'
+import * as posenet from '@tensorflow-models/posenet'
 import './debug.js'
 import Typed from 'typed.js';
 import dat from 'dat.gui'
 import Stats from 'stats.js'
-import * as posenet from '@tensorflow-models/posenet'
 import './style.scss'
 import { drawKeypoints, drawSkeleton, drawHeatMapValues } from './demo_util'
 const videoWidth = 625
@@ -12,6 +13,7 @@ const videoHeight = 250
 const stats = new Stats()
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import 'bulma'
+
 
 //posenet
 function isAndroid() {
@@ -222,49 +224,29 @@ function detectPoseInRealTime(video, net) {
         decodingMethod: 'single-person'
       });
 
-        poses.push(pose);
-        // console.log(pose.keypoints)
-        //color = `rgba(${pose.keypoints[9].position.x/100},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},1)`
+        poses.push(pose)
 
-        //left square
-        // console.log(poses.length)
-        // console.log(poses)
         if(poses.length>= 1){
         if(poses[0][0].keypoints[9].position.x > 600){
-          //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          // console.log(body.angularVelocity)
           body.position.x+=0.4
-          //console.log('right')
-          // body.position.x+=0.1
+
         }
 
         if(poses[0][0].keypoints[9].position.x < 600){
-          //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          // console.log(body.position)
           body.position.x-=0.4
-        //  console.log('left')
 
-            // body.position.x-=0.1
         }
 
         if(poses[0][0].keypoints[10].position.y < 200){
-          //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          // console.log(body.velocity)
-          //body.velocity.x-=0.01
-          //console.log('left')
 
             body.position.z-=0.4
         }
 
         if(poses[0][0].keypoints[10].position.y > 200){
-          //synthA.triggerAttackRelease((poses[0][0].keypoints[9].position.y/100 )* poses[0][0].keypoints[9].position.x,0.01)
 
-          // console.log(body.velocity)
-          //body.velocity.x-=0.01
-          //console.log('left')
 
             body.position.z+=0.4
         }
@@ -397,6 +379,26 @@ function checkKey(e) {
 }
 
 //TONE
+var synthA = new Tone.DuoSynth().toMaster()
+var freeverb = new Tone.Freeverb().toMaster()
+freeverb.dampening.value = 25
+freeverb.roomSize.value = 0.7
+synthA.connect(freeverb)
+const notes = ['E4','F4','G4','A4','D4','E3','F3','G3','A3','D3']
+
+const notesLow = ['E2','F2','G2','A2','D2','E3','F3','G3','A3','D3']
+
+var sampler = new Tone.Sampler({
+  'C3': 'samples/Clap.wav',
+  'D3': 'samples/Kick.wav',
+  'F3': 'samples/Snare.wav'
+
+}, function(){
+  //sampler will repitch the closest sample
+  //sampler.triggerAttack("D3")
+}).toMaster()
+
+
 
 //CANNNON && THREE
 // Create a
@@ -620,7 +622,27 @@ function ballCreate(x,y){
   ballBody.velocity.z = -10
   console.log(ballBody)
   ballBody.addEventListener('collide',function(e){
+    // console.log(e)
+    // console.log(e.body.position.y)
+    if(playing){
 
+
+
+      if(score > 0 && score <= 2){
+        sampler.triggerAttackRelease('F3', 1)
+        synthA.triggerAttackRelease(notes[Math.floor(Math.random()*9)],1)
+      }
+
+      if(score > 2 && score <= 4){
+        sampler.triggerAttackRelease('D3', 1)
+        synthA.triggerAttackRelease(notesLow[Math.floor(Math.random()*9)],1)
+      }
+
+      if(score > 4 ){
+        sampler.triggerAttackRelease('C3', 1)
+        synthA.triggerAttackRelease(notes[Math.floor(Math.random()*9)],1)
+      }
+    }
     if(e.contact.bi.material.name ==='playerMaterial' || e.contact.bj.material.name ==='playerMaterial')
       playing = false
 
