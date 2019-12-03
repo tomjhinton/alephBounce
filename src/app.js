@@ -390,18 +390,18 @@ var synthB = new Tone.AMSynth().chain(freeverb, pingPong, autoWah).toMaster()
 const notes = ['E4','F4','G4','A4','D4','E3','F3','G3','A3','D3']
 
 const notesLow = ['E2','F2','G2','A2','D2','E3','F3','G3','A3','D3']
-const drums = ['C3', 'D3', 'F3', 'A3', 'E3', 'G3']
+const drums = ['C3', 'D3', 'F3', 'E3', 'B3']
 var sampler = new Tone.Sampler({
   'C3': 'samples/Clap.wav',
   'D3': 'samples/Kick.wav',
   'F3': 'samples/Snare.wav',
-  'A3': 'samples/estec.aif',
   'E3': 'samples/wood.wav',
-  'G3': 'samples/daiko.wav'
+  'B3': 'samples/daiko.wav',
 
 }, function(){
   //sampler will repitch the closest sample
   //sampler.triggerAttack("D3")
+  console.log('loaded')
 }).toMaster()
 
 
@@ -635,17 +635,17 @@ function ballCreate(x,y){
 
 
       if(score > 0 && score <= 2){
-        sampler.triggerAttackRelease(drums[Math.floor(Math.random()*6)], 1)
+        sampler.triggerAttackRelease(drums[Math.floor(Math.random()*5)], 1)
         synthA.triggerAttackRelease(notes[Math.floor(Math.random()*9)],1)
       }
 
       if(score > 2 && score <= 4){
-        sampler.triggerAttackRelease(drums[Math.floor(Math.random()*6)], 1)
+        sampler.triggerAttackRelease(drums[Math.floor(Math.random()*5)], 1)
         synthA.triggerAttackRelease(notesLow[Math.floor(Math.random()*9)],1)
       }
 
       if(score > 4 ){
-        sampler.triggerAttackRelease(drums[Math.floor(Math.random()*6)], 1)
+        sampler.triggerAttackRelease(drums[Math.floor(Math.random()*5)], 1)
         synthB.triggerAttackRelease(notes[Math.floor(Math.random()*9)],1)
       }
     }
